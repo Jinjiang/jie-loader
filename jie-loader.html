@@ -1,0 +1,152 @@
+<!--
+# loader
+
+资源加载器 (暂不支持相对路径)
+
+# Example
+
+```
+<script>new JieResource('...', 'css');</script>
+<script>new JieResource('...', 'style');</script>
+<script>new JieResource('...', 'js');</script>
+<script>new JieResource('...', 'javascript');</script>
+<script>new JieResource('...', 'html');</script>
+<script>new JieResource('...', 'import');</script>
+<script>new JieResource('...');</script>
+```
+-->
+
+<script>
+  (function (global) {
+    var globalResource = [];
+    var loadingQueue = [];
+
+    var loader = {
+      load: function (element) {
+        document.head.appendChild(element);
+        element.onload =
+        element.onerror = function () {
+          console.log('loaded', this.src || this.href);
+          loadingQueue.shift();
+          loader.next();
+        };
+      },
+      next: function () {
+        var element = loadingQueue[0];
+        if (element) {
+          loader.load(element);
+        }
+      },
+      append: function (element) {
+        loadingQueue.push(element);
+        if (loadingQueue.length === 1) {
+          loader.next();
+        }
+      }
+    };
+
+    function getAbsUrl(path, relative) {
+      if (arguments.length < 2) {
+        relative = document.baseURI;
+      }
+
+      var doc = document.implementation.createHTMLDocument();
+      var base = doc.createElement('base');
+      base.setAttribute('href', relative);
+      doc.head.appendChild(base);
+
+      var link = document.createElement('link');
+      link.setAttribute('href', path);
+      doc.head.appendChild(link);
+
+      return link.href;
+    }
+
+    function Resource(script, url, type) {
+      this.currentScript = script;
+      this.type = type;
+      this.url = url;
+      this.load();
+    }
+
+    Resource.prototype.load = function () {
+      var type = this.type;
+      var url = this.url;
+
+      switch (type) {
+        case 'js':
+        case 'javascript':
+        if (globalResource.indexOf(url) === -1) {
+          globalResource.push(url);
+          this.appendScript(url);
+        }
+        break;
+        case 'css':
+        case 'style':
+        if (globalResource.indexOf(url) === -1) {
+          globalResource.push(url);
+          this.appendStyle(url);
+        }
+        break;
+        case 'html':
+        case 'import':
+        if (globalResource.indexOf(url) === -1) {
+          globalResource.push(url);
+          this.appendHTML(url);
+        }
+        break;
+        default:
+        if (globalResource.indexOf(url) === -1) {
+          globalResource.push(url);
+          this.loadResource(url);
+        }
+      }
+    };
+    Resource.prototype.encodeHTML = function (str) {
+      // http://jsperf.com/encodehtml
+      return str.replace(/\&/g, "&amp;").
+        replace(/\</g, "&lt;").
+        replace(/\>/g, "&gt;").
+        replace(/ /g, "&nbsp;").
+        replace(/"/g, "&quot;");
+    };
+    Resource.prototype.appendScript = function (url) {
+      var self = this;
+      var script = document.createElement('script');
+      script.src = url;
+      loader.append(script);
+      // this.currentScript.onload = function () {
+      // setTimeout(function () {
+      //   console.log('<script src="' + self.encodeHTML(url) + '"></' + 'script>');
+      // }, 0);
+    };
+    Resource.prototype.appendStyle = function (url) {
+      var self = this;
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = url;
+      loader.append(link);
+      // this.currentScript.onload = function () {
+      // setTimeout(function () {
+      //   console.log('<link rel="stylesheet" href="' + self.encodeHTML(url) + '"/>');
+      // }, 0);
+    };
+    Resource.prototype.appendHTML = function (url) {
+      var self = this;
+      var link = document.createElement('link');
+      link.rel = 'import';
+      link.href = url;
+      loader.append(link);
+      // this.currentScript.onload = function () {
+      // setTimeout(function () {
+      //   console.log('<link rel="import" href="' + self.encodeHTML(url) + '"/>');
+      // }, 0);
+    };
+    Resource.prototype.loadResource = function (url) {
+      var img = new Image();
+      img.src = url;
+    };
+
+    global.JieResource = Resource;
+  })(this);
+</script>

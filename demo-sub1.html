@@ -1,0 +1,22 @@
+<link rel="import" href="../polymer/polymer.html">
+<script>
+  new JieResource(document.currentScript, 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js', 'js');
+</script>
+
+<polymer-element name="demo-sub1" attributes="">
+
+  <template>
+    <button>demo sub1</button>
+  </template>
+  <script>
+    Polymer('demo-sub1', {
+      domReady: function () {
+        console.log('domReady');
+      },
+      attached: function () {
+        console.log('attached');
+      }
+    });
+  </script>
+
+</polymer-element>

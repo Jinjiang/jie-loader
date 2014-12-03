@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no">
+
+<title>Jie Loader</title>
+
+<script src="../webcomponentsjs/webcomponents.js"></script>
+<link rel="import" href="jie-loader.html">
+<link rel="import" href="demo-sub1.html">
+<link rel="import" href="demo-sub2.html">
+
+<script>
+  new JieResource(document.currentScript, 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js', 'javascript');
+  new JieResource(document.currentScript, 'http://getbootstrap.com/dist/js/bootstrap.js', 'js');
+  document.write('<meta>');
+</script>
+</head>
+<body>
+
+<script>
+  console.log('body');
+</script>
+
+<demo-sub1></demo-sub1>
+
+</body>
+</html>
